@@ -13,7 +13,7 @@ export const CommitSchema = z.object({
   distinct: z.boolean(),
   id: z.string(),
   message: z.string(),
-  timestamp: z.date(),
+  timestamp: z.coerce.date(),
   tree_id: z.string(),
   url: z.string().url(),
 });
