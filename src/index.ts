@@ -17,8 +17,14 @@ async function main() {
   }
   const commits = commitsParsed.data;
   console.log(
+    "commits:",
     commits.map((c) => `[${c.id}] ${c.author.username} - ${c.message}`)
   );
+
+  const ticketIds = commits.flatMap(
+    (c) => c.message.match(/([A-Z]+-\d+)/g) ?? []
+  );
+  console.log("tickets:", ticketIds);
 }
 
 main().catch((e) => core.setFailed(e));
