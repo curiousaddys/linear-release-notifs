@@ -5,6 +5,8 @@ import got from "got"
 import { z } from "zod"
 import { CommitSchema } from "./types"
 
+const MAX_ISSUE_TITLE_LENGTH = 50
+
 function getIssueIds(commits: CommitSchema[]) {
   return commits.flatMap((c) => c.message.match(/([A-Z]+-\d+)/g) ?? [])
 }
@@ -22,6 +24,10 @@ function validateContextAndGetCommits() {
   }
 
   return commitsParsed.data
+}
+
+function truncateTo(input: string, length: number) {
+  return input.length > length ? `${input.slice(0, length - 1)}…` : input
 }
 
 async function main() {
@@ -80,11 +86,10 @@ async function main() {
         issue.labels(),
       ])
       return {
-        title: `${issue.identifier}: ${
-          issue.title.length > 50
-            ? `${issue.title.slice(0, 47)}...`
-            : issue.title
-        }`,
+        title: `${issue.identifier}: ${truncateTo(
+          issue.title,
+          MAX_ISSUE_TITLE_LENGTH
+        )}`,
         url: issue.url,
         assignee: assignee?.name,
         labels: labels.nodes.map((label) => label.name),
@@ -96,7 +101,7 @@ async function main() {
     json: {
       embeds: [
         {
-          title: "Update Released - Ticket Summary",
+          title: "Update Released",
           fields: ticketSummaries.map((it) => {
             const values = [`[View](${it.url})`]
             if (it.assignee) {
