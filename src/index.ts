@@ -97,11 +97,20 @@ async function main() {
     })
   )
 
+  const { repo } = github.context
+  console.log("context:", github.context)
+
   await got.post(webhookUrl, {
     json: {
       embeds: [
         {
-          title: `Update released in ${github.context.repo.owner}/${github.context.repo.repo}`,
+          author: {
+            name: `Update released`,
+            url: github.context.serverUrl,
+          },
+          footer: {
+            text: `${repo.repo}/${repo.repo}`,
+          },
           fields: ticketSummaries.map((it) => {
             const values = [`[View](${it.url})`]
             if (it.assignee) {
