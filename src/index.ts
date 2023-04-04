@@ -14,7 +14,9 @@ function validateContextAndGetCommits() {
     throw "This action can only be used on push events."
   }
 
-  const commitsParsed = z.array(CommitSchema).safeParse(github.context.payload.commits)
+  const commitsParsed = z
+    .array(CommitSchema)
+    .safeParse(github.context.payload.commits)
   if (!commitsParsed.success) {
     throw commitsParsed.error
   }
@@ -68,10 +70,17 @@ async function main() {
 
   const ticketSummaries = await Promise.all(
     issues.map(async (issue) => {
-      const [assignee, labels] = await Promise.all([issue.assignee, issue.labels()])
-      return `- (\`${labels.nodes.map((label) => label.name).join("\n")}\`) [${issue.identifier}: ${
-        issue.title
-      }](${issue.url})${assignee ? ` (${assignee.displayName})` : ""}`
+      const [assignee, labels] = await Promise.all([
+        issue.assignee,
+        issue.labels(),
+      ])
+      return `-${
+        labels.nodes.length
+          ? ` (\`${labels.nodes.map((label) => label.name).join("\n")}\`)`
+          : ""
+      } [${issue.identifier}: ${issue.title}](${issue.url})${
+        assignee ? ` (${assignee.displayName})` : ""
+      }`
     })
   )
 
