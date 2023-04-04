@@ -115,6 +115,7 @@ async function main() {
               value: values.join(" • "),
             }
           }),
+          color: 6451704,
         },
       ],
     },
