@@ -115,7 +115,8 @@ async function main() {
               value: values.join(" • "),
             }
           }),
-          color: 6451704,
+          // primary 500
+          color: 0x7866cc,
         },
       ],
     },
