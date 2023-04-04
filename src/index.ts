@@ -3,7 +3,7 @@ import * as github from "@actions/github"
 import { LinearClient } from "@linear/sdk"
 import got from "got"
 import { z } from "zod"
-import { CommitSchema } from "./types"
+import { CommitSchema, PushPayload } from "./types"
 
 const MAX_ISSUE_TITLE_LENGTH = 50
 
@@ -11,19 +11,17 @@ function getIssueIds(commits: CommitSchema[]) {
   return commits.flatMap((c) => c.message.match(/([A-Z]+-\d+)/g) ?? [])
 }
 
-function validateContextAndGetCommits() {
+function validateContextAndGetPayload() {
   if (github.context.eventName !== "push") {
     throw "This action can only be used on push events."
   }
 
-  const commitsParsed = z
-    .array(CommitSchema)
-    .safeParse(github.context.payload.commits)
-  if (!commitsParsed.success) {
-    throw commitsParsed.error
+  const payloadParsed = PushPayload.safeParse(github.context.payload.commits)
+  if (!payloadParsed.success) {
+    throw payloadParsed.error
   }
 
-  return commitsParsed.data
+  return payloadParsed.data
 }
 
 function truncateTo(input: string, length: number) {
@@ -36,8 +34,8 @@ async function main() {
     apiKey: core.getInput("linear-api-key", { required: true }),
   })
 
-  const commits = validateContextAndGetCommits()
-  const issueIds = getIssueIds(commits)
+  const payload = validateContextAndGetPayload()
+  const issueIds = getIssueIds(payload.commits)
 
   const issues = (
     await Promise.all(
@@ -104,13 +102,11 @@ async function main() {
     json: {
       embeds: [
         {
-          author: {
-            name: `Update released`,
-            url: github.context.serverUrl,
-          },
-          footer: {
-            text: `${repo.repo}/${repo.repo}`,
-          },
+          title: `${repo.owner}/${repo.repo} released`,
+          url: payload.compare,
+          // primary 500
+          color: 0x7866cc,
+          timestamp: new Date().toISOString(),
           fields: ticketSummaries.map((it) => {
             const values = [`[View](${it.url})`]
             if (it.assignee) {
@@ -124,8 +120,6 @@ async function main() {
               value: values.join(" • "),
             }
           }),
-          // primary 500
-          color: 0x7866cc,
         },
       ],
     },

@@ -18,3 +18,8 @@ export const CommitSchema = z.object({
   url: z.string().url(),
 })
 export type CommitSchema = z.infer<typeof CommitSchema>
+
+export const PushPayload = z.object({
+  compare: z.string(),
+  commits: z.array(CommitSchema),
+})
