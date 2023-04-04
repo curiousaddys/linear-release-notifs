@@ -80,12 +80,13 @@ async function main() {
         issue.labels(),
       ])
       return {
-        title: `${issue.identifier}: ${issue.title.length > 50
+        title: `${issue.identifier}: ${
+          issue.title.length > 50
             ? `${issue.title.slice(0, 47)}...`
             : issue.title
-          }`,
+        }`,
         url: issue.url,
-        assignee: assignee?.displayName,
+        assignee: assignee?.name,
         labels: labels.nodes.map((label) => label.name),
       }
     })
