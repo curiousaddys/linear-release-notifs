@@ -1,9 +1,9 @@
-import * as core from "@actions/core"
-import * as github from "@actions/github"
-import { LinearClient } from "@linear/sdk"
-import got from "got"
-import { z } from "zod"
-import { CommitSchema, PushPayload } from "./types"
+import * as core from '@actions/core'
+import * as github from '@actions/github'
+import { LinearClient } from '@linear/sdk'
+import got from 'got'
+import { z } from 'zod'
+import { CommitSchema, PushPayload } from './types'
 
 const MAX_ISSUE_TITLE_LENGTH = 50
 
@@ -12,8 +12,8 @@ function getIssueIds(commits: CommitSchema[]) {
 }
 
 function validateContextAndGetPayload() {
-  if (github.context.eventName !== "push") {
-    throw "This action can only be used on push events."
+  if (github.context.eventName !== 'push') {
+    throw 'This action can only be used on push events.'
   }
 
   const payloadParsed = PushPayload.safeParse(github.context.payload.commits)
@@ -29,9 +29,9 @@ function truncateTo(input: string, length: number) {
 }
 
 async function main() {
-  const webhookUrl = core.getInput("discord-webhook-url", { required: true })
+  const webhookUrl = core.getInput('discord-webhook-url', { required: true })
   const linear = new LinearClient({
-    apiKey: core.getInput("linear-api-key", { required: true }),
+    apiKey: core.getInput('linear-api-key', { required: true }),
   })
 
   const payload = validateContextAndGetPayload()
@@ -51,7 +51,7 @@ async function main() {
   ).flat()
 
   if (issues.length === 0) {
-    console.log("No tickets found in commit messages. Skipping webhook.")
+    console.log('No tickets found in commit messages. Skipping webhook.')
     return
   }
 
@@ -65,7 +65,7 @@ async function main() {
       nodes: [doneState],
     } = await team.states({
       filter: {
-        name: { eqIgnoreCase: "Done" },
+        name: { eqIgnoreCase: 'Done' },
       },
     })
     if (!doneState) {
@@ -96,7 +96,7 @@ async function main() {
   )
 
   const { repo } = github.context
-  console.log("context:", github.context)
+  console.log('context:', github.context)
 
   await got.post(webhookUrl, {
     json: {
@@ -113,11 +113,11 @@ async function main() {
               values.push(it.assignee)
             }
             if (it.labels.length) {
-              values.push(it.labels.join(", "))
+              values.push(it.labels.join(', '))
             }
             return {
               name: it.title,
-              value: values.join(" • "),
+              value: values.join(' • '),
             }
           }),
         },
