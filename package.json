@@ -1,12 +1,17 @@
 {
-  "type": "module",
   "name": "linear-release-notifs",
   "version": "1.0.0",
   "description": "A small GitHub action to update Linear tickets when pushing to a particular branch",
-  "main": "index.mjs",
+  "main": "dist/action.global.js",
+  "scripts": {
+    "build": "tsup --minify --format=iife --entry.action src/index.js"
+  },
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/github": "^5.1.1",
     "@linear/sdk": "^2.6.0"
+  },
+  "devDependencies": {
+    "tsup": "^6.7.0"
   }
 }
