@@ -46,6 +46,11 @@ async function main() {
     )
   ).flat()
 
+  if (issues.length === 0) {
+    console.log("No tickets found in commit messages. Skipping webhook.")
+    return
+  }
+
   for (const issue of issues) {
     const team = await issue.team
     if (!team) {
@@ -74,27 +79,36 @@ async function main() {
         issue.assignee,
         issue.labels(),
       ])
-      return `-${
-        labels.nodes.length
-          ? ` (\`${labels.nodes.map((label) => label.name).join("\n")}\`)`
-          : ""
-      } [${issue.identifier}: ${issue.title}](${issue.url})${
-        assignee ? ` (${assignee.displayName})` : ""
-      }`
+      return {
+        title: `${issue.identifier}: ${issue.title.length > 50
+            ? `${issue.title.slice(0, 47)}...`
+            : issue.title
+          }`,
+        url: issue.url,
+        assignee: assignee?.displayName,
+        labels: labels.nodes.map((label) => label.name),
+      }
     })
   )
-
-  if (ticketSummaries.length === 0) {
-    console.log("No tickets found in commit messages. Skipping webhook.")
-    return
-  }
 
   await got.post(webhookUrl, {
     json: {
       embeds: [
         {
           title: "Update Released - Ticket Summary",
-          description: ticketSummaries.join("\n"),
+          fields: ticketSummaries.map((it) => {
+            const values = [`[View](${it.url})`]
+            if (it.assignee) {
+              values.push(it.assignee)
+            }
+            if (it.labels.length) {
+              values.push(it.labels.join(", "))
+            }
+            return {
+              name: it.title,
+              value: values.join(" • "),
+            }
+          }),
         },
       ],
     },
