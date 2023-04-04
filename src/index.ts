@@ -101,7 +101,7 @@ async function main() {
     json: {
       embeds: [
         {
-          title: "Update Released",
+          title: `Update released in ${github.context.repo.owner}/${github.context.repo.repo}`,
           fields: ticketSummaries.map((it) => {
             const values = [`[View](${it.url})`]
             if (it.assignee) {
