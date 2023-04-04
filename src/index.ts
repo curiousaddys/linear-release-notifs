@@ -2,7 +2,6 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { LinearClient } from '@linear/sdk'
 import got from 'got'
-import { z } from 'zod'
 import { CommitSchema, PushPayload } from './types'
 
 const MAX_ISSUE_TITLE_LENGTH = 50
@@ -40,12 +39,17 @@ async function main() {
   const issues = (
     await Promise.all(
       issueIds.map(async (issueId) => {
-        const issue = await linear.issue(issueId)
-        if (!issue) {
-          console.warn(`Unknown issue ID: ${issueId}`)
+        try {
+          const issue = await linear.issue(issueId)
+          if (!issue) {
+            console.warn(`Unknown issue ID: ${issueId}`)
+            return []
+          }
+          return issue
+        } catch (e) {
+          console.warn(`Failed to find issue ID '${issueId}':`, e)
           return []
         }
-        return issue
       })
     )
   ).flat()
