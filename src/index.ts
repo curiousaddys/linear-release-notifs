@@ -16,7 +16,7 @@ function validateContextAndGetPayload() {
     throw 'This action can only be used on push events.'
   }
 
-  const payloadParsed = PushPayload.safeParse(github.context.payload.commits)
+  const payloadParsed = PushPayload.safeParse(github.context.payload)
   if (!payloadParsed.success) {
     throw payloadParsed.error
   }
